@@ -42,7 +42,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 {
 	SetPointers* sets = static_cast<SetPointers*>(data);
 	if (strcmp(name, "instruction") == 0 || strcmp(name, "load") == 0 ||
-		strcmp(name, "modify")||strcmp(name, "store") == 0) {
+		strcmp(name, "modify") == 0||strcmp(name, "store") == 0) {
 		long address(0);
 		long page(0);
 		int offset(0);
@@ -52,9 +52,11 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 				address = strtol(attr[i+1], NULL, 16);
 				page = address >> 12;
 				offset = address & 0xFFF;
+				continue;
 			}
 			if (strcmp(attr[i], "size") == 0) {
 				size = strtol(attr[i + 1], NULL, 16);
+				continue;
 			}
 		} 
 		map<long, bitset<4096> >::iterator itLocal;
