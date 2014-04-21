@@ -1,11 +1,11 @@
 #include <iostream>
-#include <vector>
 #include <map>
 #include <algorithm>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
 #include <fstream>
+#include <bitset>
 #include <expat.h>
 #include <pthread.h>
 
@@ -15,17 +15,17 @@ using namespace std;
 
 static char outputfile[BUFFSZ];
 static pthread_mutex_t countLock = PTHREAD_MUTEX_INITIALIZER;
-static map<long, vector<char> > overallCount;
-static map<long, vector<char> > overallMemory;
-static map<long, vector<char> > overallCode;
+static map<long, bitset<4096> > overallCount;
+static map<long, bitset<4096> > overallMemory;
+static map<long, bitset<4096> > overallCode;
 
 //use this class to pass data to threads and parser
 class SetPointers
 {
 	public:
-	map<long, vector<char> >* lCount;
-	map<long, vector<char> >* lMemory;
-	map<long, vector<char> >* lCode;
+	map<long, bitset<4096> >* lCount;
+	map<long, bitset<4096> >* lMemory;
+	map<long, bitset<4096> >* lCode;
 	char* threadPath;
 	int threadID;
 };
@@ -52,63 +52,42 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 				page = address >> 12;
 				offset = address & 0xFFF;
 			}
-			if (strcmp(attr[i], "size") == 0 {
+			if (strcmp(attr[i], "size") == 0) {
 				size = strtol(attr[i + 1], NULL, 16);
 			}
 		} 
-			map<long, vector<char> >::iterator itLocal;
+		map<long, bitset<4096> >::iterator itLocal;
 
 		itLocal = sets->lCount->find(page);
-		if (itLocal == sets->lCount->end() {
-			sets->lCount->insert(pair<long, vector<char> >
-				(page, vector<char>(512, '\0')));
+		if (itLocal == sets->lCount->end()) {
+			sets->lCount->insert(pair<long, bitset<4096> >
+				(page, bitset<4096>(0)));
 			itLocal = sets->lCount->find(page);
 		}
 		//now mark the bitmap
-		int markByte = offset/8;
-		int markBit = offset%8;
 		for (int i = 0; i < size; i++) {
-			if (markBit >= 8) {
-				markBit = 0;
-				markByte++;
-			}
-			(itLocal->second)[markByte] |= 1 << markBit;
-			markBit++;
+			itLocal->second[i + offset] = 1;
 		}
-	
+			
 		if (strcmp(name, "instruction") == 0) {
 			itLocal = sets->lCode->find(page);
-			if (itLocal == sets->lCode->end() {
-				sets->lCode->insert(pair<long, vector<char> >
-					(page, vector<char>(512, '\0')));
+			if (itLocal == sets->lCode->end()) {
+				sets->lCode->insert(pair<long, bitset<4096> >
+					(page, bitset<4096>(0)));
 				itLocal = sets->lCode->find(page);
 			}
-			int markByte = offset/8;
-			int markBit = offset%8;
 			for (int i = 0; i < size; i++) {
-				if (markBit >= 8) {
-					markBit = 0;
-					markByte++;
-				}
-				(itLocal->second)[markByte] |= 1 << markBit;
-				markBit++;
+				itLocal->second[i + offset] = 1;
 			}
 		} else {
 			itLocal = sets->lMemory->find(page);
-			if (itLocal == sets->lMemory->end() {
-				sets->lMemory->insert(pair<long, vector<char> >
-					(page, vector<char>(512, '\0')));
+			if (itLocal == sets->lMemory->end()) {
+				sets->lMemory->insert(pair<long, bitset<4096> >
+					(page, bitset<4096>(0)));
 				itLocal = sets->lMemory->find(page);
 			}
-			int markByte = offset/8;
-			int markBit = offset%8;
 			for (int i = 0; i < size; i++) {
-				if (markBit >= 8) {
-					markBit = 0;
-					markByte++;
-				}
-				(itLocal->second)[markByte] |= 1 << markBit;
-				markBit++;
+				itLocal->second[i + offset] = 1;
 			}
 		}
 	}
@@ -151,20 +130,20 @@ static void* hackMemory(void* tSets)
 
 	pthread_mutex_lock(&countLock);
 	cout << "Thread handled \n";
-	map<long, vector<char> >::iterator itLocal;
-	map<long, vector<char> >::iterator itGlobal;
+	map<long, bitset<4096> >::iterator itLocal;
+	map<long, bitset<4096> >::iterator itGlobal;
 
 	for (itLocal = threadSets->lCount->begin();
 		itLocal != threadSets->lCount->end(); itLocal++) {
 		long page = itLocal->first;
 		itGlobal = overallCount.find(page);
 		if (itGlobal == overallCount.end()){
-			overallCount.insert(pair<long, vector<char> >
-				(page, vector<char>(512, '\0')));
+			overallCount.insert(pair<long, bitset<4096> >
+				(page, bitset<4096>(0)));
 			itGlobal = overallCount.find(page);
 		}
 		for (int i = 0; i < 512; i++) {
-			(itGlobal->second)[i] |= (itLocal->second)[i]
+			(itGlobal->second)[i] |= (itLocal->second)[i];
 		}
 	}
 	
@@ -173,8 +152,8 @@ static void* hackMemory(void* tSets)
 		long page = itLocal->first;
 		itGlobal = overallMemory.find(page);
 		if (itGlobal == overallMemory.end()){
-			overallMemory.insert(pair<long, vector<char> >
-				(page, vector<char>(512, '\0')));
+			overallMemory.insert(pair<long, bitset<4096> >
+				(page, bitset<4096>(0)));
 			itGlobal = overallMemory.find(page);
 		}
 		for (int i = 0; i < 512; i++) {
@@ -187,8 +166,8 @@ static void* hackMemory(void* tSets)
 		long page = itLocal->first;
 		itGlobal = overallCode.find(page);
 		if (itGlobal == overallCode.end()){
-			overallCode.insert(pair<long, vector<char> >
-				(page, vector<char>(512, '\0')));
+			overallCode.insert(pair<long, bitset<4096> >
+				(page, bitset<4096>(0)));
 			itGlobal = overallCode.find(page);
 		}
 		for (int i = 0; i < 512; i++) {
@@ -211,9 +190,9 @@ countThread(int threadID, char* threadPath)
 	cout << "Handling thread " << threadID << "\n";
 	//parse each file in parallel
 	SetPointers* threadSets = new SetPointers();
-	threadSets->lCount = new map<long, vector<char> >();
-	threadSets->lMemory = new map<long, vector<char> >();
-	threadSets->lCode = new map<long, vector<char> >();
+	threadSets->lCount = new map<long, bitset<4096> >();
+	threadSets->lMemory = new map<long, bitset<4096> >();
+	threadSets->lCode = new map<long, bitset<4096> >();
 	threadSets->threadPath = threadPath;
 	threadSets->threadID = threadID;
 	
@@ -313,7 +292,7 @@ int main(int argc, char* argv[])
 	for_each(threads.begin(), threads.end(), joinup);
 	for_each(threads.begin(), threads.end(), killoff);
 	
-	map<int, int>::iterator it;
+	map<long, bitset<4096> >::iterator it;
 	ofstream overallFile;
 	ofstream memoryFile;
 	ofstream codeFile;
