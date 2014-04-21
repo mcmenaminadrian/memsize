@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include <map>
 #include <algorithm>
 #include <cstdlib>
@@ -42,10 +43,10 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 	SetPointers* sets = static_cast<SetPointers*>(data);
 	if (strcmp(name, "instruction") == 0 || strcmp(name, "load") == 0 ||
 		strcmp(name, "modify")||strcmp(name, "store") == 0) {
-		long address;
-		long page;
-		int offset;
-		long size;
+		long address(0);
+		long page(0);
+		int offset(0);
+		long size(0);
 		for (int i = 0; attr[i]; i += 2) {
 			if (strcmp(attr[i], "address") == 0) {
 				address = strtol(attr[i+1], NULL, 16);
@@ -142,9 +143,7 @@ static void* hackMemory(void* tSets)
 				(page, bitset<4096>(0)));
 			itGlobal = overallCount.find(page);
 		}
-		for (int i = 0; i < 512; i++) {
-			(itGlobal->second)[i] |= (itLocal->second)[i];
-		}
+		itGlobal->second |= itLocal->second;
 	}
 	
 	for (itLocal = threadSets->lMemory->begin();
@@ -156,9 +155,7 @@ static void* hackMemory(void* tSets)
 				(page, bitset<4096>(0)));
 			itGlobal = overallMemory.find(page);
 		}
-		for (int i = 0; i < 512; i++) {
-			(itGlobal->second)[i] |= (itLocal->second)[i];
-		}
+		itGlobal->second |= itLocal->second;
 	}
 
 	for (itLocal = threadSets->lCode->begin();
@@ -170,9 +167,7 @@ static void* hackMemory(void* tSets)
 				(page, bitset<4096>(0)));
 			itGlobal = overallCode.find(page);
 		}
-		for (int i = 0; i < 512; i++) {
-			(itGlobal->second)[i] |= (itLocal->second)[i];
-		}
+		itGlobal->second |= itLocal->second;
 	}
 	cout << "Thread memory mapping complete.\n";
 	pthread_mutex_unlock(&countLock);
