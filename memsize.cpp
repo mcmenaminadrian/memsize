@@ -13,10 +13,6 @@ using namespace std;
 
 #define BUFFSZ 512
 
-class bitmap
-{
-	
-
 static char outputfile[BUFFSZ];
 static pthread_mutex_t countLock = PTHREAD_MUTEX_INITIALIZER;
 static map<long, vector<char> > overallCount;
@@ -46,11 +42,11 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 	SetPointers* sets = static_cast<SetPointers*>(data);
 	if (strcmp(name, "instruction") == 0 || strcmp(name, "load") == 0 ||
 		strcmp(name, "modify")||strcmp(name, "store") == 0) {
+		long address;
+		long page;
+		int offset;
+		long size;
 		for (int i = 0; attr[i]; i += 2) {
-			long address;
-			long page;
-			int offset;
-			long size;
 			if (strcmp(attr[i], "address") == 0) {
 				address = strtol(attr[i+1], NULL, 16);
 				page = address >> 12;
@@ -215,9 +211,9 @@ countThread(int threadID, char* threadPath)
 	cout << "Handling thread " << threadID << "\n";
 	//parse each file in parallel
 	SetPointers* threadSets = new SetPointers();
-	threadSets->lCount = new map<int, int>();
-	threadSets->lMemory = new map<int, int>();
-	threadSets->lCode = new map<int, int>();
+	threadSets->lCount = new map<long, vector<char> >();
+	threadSets->lMemory = new map<long, vector<char> >();
+	threadSets->lCode = new map<long, vector<char> >();
 	threadSets->threadPath = threadPath;
 	threadSets->threadID = threadID;
 	
