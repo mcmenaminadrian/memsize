@@ -56,9 +56,8 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 			}
 			if (strcmp(attr[i], "size") == 0) {
 				size = strtol(attr[i + 1], NULL, 16);
-				continue;
 			}
-		} 
+		}
 		map<long, bitset<4096> >::iterator itLocal;
 
 		itLocal = sets->lCount->find(page);
@@ -69,7 +68,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 		}
 		//now mark the bitmap
 		for (int i = 0; i < size; i++) {
-			itLocal->second[i + offset] = 1;
+			(itLocal->second)[i + offset] = 1;
 		}
 			
 		if (strcmp(name, "instruction") == 0) {
@@ -80,7 +79,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 				itLocal = sets->lCode->find(page);
 			}
 			for (int i = 0; i < size; i++) {
-				itLocal->second[i + offset] = 1;
+				(itLocal->second)[i + offset] = 1;
 			}
 		} else {
 			itLocal = sets->lMemory->find(page);
@@ -90,7 +89,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 				itLocal = sets->lMemory->find(page);
 			}
 			for (int i = 0; i < size; i++) {
-				itLocal->second[i + offset] = 1;
+				(itLocal->second)[i + offset] = 1;
 			}
 		}
 	}
