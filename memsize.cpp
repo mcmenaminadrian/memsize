@@ -199,7 +199,7 @@ static void* hackMemory(void* tSets)
 			(itGlobal->second)[i] |= (itLocal->second)[i];
 		}
 	}
-
+	cout << "Thread memory mapping complete.\n";
 	pthread_mutex_unlock(&countLock);
 	delete threadSets->lCount;
 	delete threadSets->lMemory;
@@ -297,7 +297,7 @@ int main(int argc, char* argv[])
 	}
 
 
-	cout << "Pagestats: which bits of pages are being touched\n";
+	cout << "Memsize: how much of pages are being touched\n";
 	cout << "Copyright (c), Adrian McMenamin, 2014 \n";
 	cout << "See https://github.com/mcmenaminadrian for licence details.\n";
 	do {
@@ -321,22 +321,22 @@ int main(int argc, char* argv[])
 	ofstream overallFile;
 	ofstream memoryFile;
 	ofstream codeFile;
-	
-	overallFile.open("~/overallmem.txt");
+	cout << "Writing results to " << argv[2] << "\n";
+	overallFile.open(argv[2]);
 	for (it = overallCount.begin(); it != overallCount.end(); it++)
 	{
 		overallFile << it->first << "," << it->second << "\n";
 	}
 	overallFile.close();
 
-	memoryFile.open("~/memonly.txt");
+	memoryFile.open("~/memmap.txt");
 	for (it = overallMemory.begin(); it != overallMemory.end(); it++)
 	{
 		memoryFile << it->first << "," << it->second << "\n";
 	}
 	memoryFile.close();
 
-	codeFile.open("~/codeonly.txt");
+	codeFile.open("~/codemap.txt");
 	for (it = overallCode.begin(); it != overallCode.end(); it++)
 	{
 		codeFile << it->first << "," << it->second << "\n";
