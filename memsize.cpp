@@ -69,7 +69,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 		}
 		//now mark the bitmap
 		for (i = 0; i < size; i++) {
-			(itLocal->second)[i + offset] = 1;
+			(itLocal->second).set(i + offset);
 		}
 			
 		if (strcmp(name, "instruction") == 0) {
@@ -80,7 +80,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 				itLocal = sets->lCode->find(page);
 			}
 			for (i = 0; i < size; i++) {
-				(itLocal->second)[i + offset] = 1;
+				(itLocal->second).set(i + offset);
 			}
 		} else {
 			itLocal = sets->lMemory->find(page);
@@ -90,7 +90,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 				itLocal = sets->lMemory->find(page);
 			}
 			for (i = 0; i < size; i++) {
-				(itLocal->second)[i + offset] = 1;
+				(itLocal->second).set(i + offset);
 			}
 		}
 	}
