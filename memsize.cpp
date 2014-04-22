@@ -83,7 +83,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 			for (;i < size; i++) {
 				(itLocal->second).set(i);
 			}
-		}	
+		}
 			
 		if (strcmp(name, "instruction") == 0) {
 			itLocal = sets->lCode->find(page);
@@ -92,19 +92,53 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 					(page, bitset<4096>()));
 				itLocal = sets->lCode->find(page);
 			}
-			for (i = 0; i < size; i++) {
-				(itLocal->second).set(i + offset);
+
+			try {
+				for (i = 0; i < size; i++) {
+					(itLocal->second).set(i + offset);
+				}
 			}
+			catch (const out_of_range& oor) {
+				long nextPage = page + 1;
+				itLocal = sets->lCode->find(nextPage);
+				if (itLocal == sets->lCode->end()) {
+					sets->lCode->insert(
+						pair<long, bitset<4096> >
+						(nextPage, bitset<4096>()));
+					itLocal = sets->lCode->find(nextPage);
+				}
+				for (;i < size; i++) {
+					(itLocal->second).set(i);
+				}
+			}
+
 		} else {
 			itLocal = sets->lMemory->find(page);
 			if (itLocal == sets->lMemory->end()) {
-				sets->lMemory->insert(pair<long, bitset<4096> >
+				sets->lMemory->insert(
+					pair<long, bitset<4096> >
 					(page, bitset<4096>()));
 				itLocal = sets->lMemory->find(page);
 			}
-			for (i = 0; i < size; i++) {
-				(itLocal->second).set(i + offset);
+			try {
+				for (i = 0; i < size; i++) {
+					(itLocal->second).set(i + offset);
+				}
 			}
+			catch (const out_of_range& oor) {
+				long nextPage = page + 1;
+				itLocal = sets->lMemory->find(nextPage);
+				if (itLocal == sets->lMemory->end()) {
+					sets->lMemory->insert(
+						pair<long, bitset<4096> >
+						(nextPage, bitset<4096>()));
+					itLocal = sets->
+						lMemory->find(nextPage);
+				}
+				for (;i < size; i++) {
+					(itLocal->second).set(i);
+				}
+			}	
 		}
 	}
 }
