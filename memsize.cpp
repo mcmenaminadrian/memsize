@@ -47,7 +47,8 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 		long page(0);
 		int offset(0);
 		long size(0);
-		for (int i = 0; attr[i]; i += 2) {
+		int i(0);
+		for (i = 0; attr[i]; i += 2) {
 			if (strcmp(attr[i], "address") == 0) {
 				address = strtol(attr[i+1], NULL, 16);
 				page = address >> 12;
@@ -67,7 +68,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 			itLocal = sets->lCount->find(page);
 		}
 		//now mark the bitmap
-		for (int i = 0; i < size; i++) {
+		for (i = 0; i < size; i++) {
 			(itLocal->second)[i + offset] = 1;
 		}
 			
@@ -78,7 +79,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 					(page, bitset<4096>()));
 				itLocal = sets->lCode->find(page);
 			}
-			for (int i = 0; i < size; i++) {
+			for (i = 0; i < size; i++) {
 				(itLocal->second)[i + offset] = 1;
 			}
 		} else {
@@ -88,7 +89,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 					(page, bitset<4096>()));
 				itLocal = sets->lMemory->find(page);
 			}
-			for (int i = 0; i < size; i++) {
+			for (i = 0; i < size; i++) {
 				(itLocal->second)[i + offset] = 1;
 			}
 		}
