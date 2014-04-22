@@ -358,7 +358,7 @@ int main(int argc, char* argv[])
 	codeFile.open("~/codemap.txt");
 	for (it = overallCode.begin(); it != overallCode.end(); it++)
 	{
-		codeFile << it->first << "," << it->second << "\n";
+		codeFile << it->first << "," << it->second.count() << "\n";
 	}
 	codeFile.close();
 
