@@ -173,11 +173,8 @@ static void* hackMemory(void* tSets)
 	}
 	cout << "Thread memory mapping complete.\n";
 	pthread_mutex_unlock(&countLock);
-	threadSets->lCount->clear();
 	delete threadSets->lCount;
-	threadSets->lMemory->clear();
 	delete threadSets->lMemory;
-	threadSets->lCode->clear();
 	delete threadSets->lCode;
 	return NULL;
 }
