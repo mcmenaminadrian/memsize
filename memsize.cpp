@@ -93,7 +93,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 				(itLocal->second).set(i + offset);
 			}
 		}
-		} catch (int e) {cout << "EXCEPTION " << e << "\n" ;}
+		} catch (...) {cout << "EXCEPTIONi\n";}
 	}
 }
 
