@@ -40,7 +40,6 @@ void usage()
 static void XMLCALL
 hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 {
-	static long x = 0;
 	SetPointers* sets = static_cast<SetPointers*>(data);
 	if (strcmp(name, "instruction") == 0 || strcmp(name, "load") == 0 ||
 		strcmp(name, "modify") == 0||strcmp(name, "store") == 0) {
@@ -61,17 +60,29 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 			}
 		}
 		map<long, bitset<4096> >::iterator itLocal;
-		try {
 		itLocal = sets->lCount->find(page);
 		if (itLocal == sets->lCount->end()) {
 			sets->lCount->insert(pair<long, bitset<4096> >
 				(page, bitset<4096>()));
 			itLocal = sets->lCount->find(page);
 		}
-		//now mark the bitmap
-		for (i = 0; i < size; i++) {
-			(itLocal->second).set(i + offset);
+		try {
+			for (i = 0; i < size; i++) {
+				(itLocal->second).set(i + offset);
+			}
 		}
+		catch (const out_of_range& oor) {
+			long nextPage = page + 1;
+			itLocal = sets->lCount->find(nextPage);
+			if (itLocal == sets->lCount->end()) {
+				sets->lCount->insert(pair<long, bitset<4096> >
+					(nextPage, bitset<4096>()));
+				itLocal = sets->lCount->find(nextPage);
+			}
+			for (;i < size; i++) {
+				(itLocal->second).set(i);
+			}
+		}	
 			
 		if (strcmp(name, "instruction") == 0) {
 			itLocal = sets->lCode->find(page);
@@ -94,7 +105,6 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 				(itLocal->second).set(i + offset);
 			}
 		}
-		} catch (...) {x++; cout << "EXCEPTION " << x << "\n";}
 	}
 }
 
