@@ -7,6 +7,7 @@
 #include <cstring>
 #include <fstream>
 #include <bitset>
+#include <stdexcept>
 #include <expat.h>
 #include <pthread.h>
 
