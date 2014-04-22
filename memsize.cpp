@@ -63,7 +63,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 		itLocal = sets->lCount->find(page);
 		if (itLocal == sets->lCount->end()) {
 			sets->lCount->insert(pair<long, bitset<4096> >
-				(page, bitset<4096>(0)));
+				(page, bitset<4096>));
 			itLocal = sets->lCount->find(page);
 		}
 		//now mark the bitmap
@@ -75,7 +75,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 			itLocal = sets->lCode->find(page);
 			if (itLocal == sets->lCode->end()) {
 				sets->lCode->insert(pair<long, bitset<4096> >
-					(page, bitset<4096>(0)));
+					(page, bitset<4096>));
 				itLocal = sets->lCode->find(page);
 			}
 			for (int i = 0; i < size; i++) {
@@ -85,7 +85,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 			itLocal = sets->lMemory->find(page);
 			if (itLocal == sets->lMemory->end()) {
 				sets->lMemory->insert(pair<long, bitset<4096> >
-					(page, bitset<4096>(0)));
+					(page, bitset<4096>));
 				itLocal = sets->lMemory->find(page);
 			}
 			for (int i = 0; i < size; i++) {
@@ -141,7 +141,7 @@ static void* hackMemory(void* tSets)
 		itGlobal = overallCount.find(page);
 		if (itGlobal == overallCount.end()){
 			overallCount.insert(pair<long, bitset<4096> >
-				(page, bitset<4096>(0)));
+				(page, bitset<4096>));
 			itGlobal = overallCount.find(page);
 		}
 		itGlobal->second |= itLocal->second;
@@ -153,7 +153,7 @@ static void* hackMemory(void* tSets)
 		itGlobal = overallMemory.find(page);
 		if (itGlobal == overallMemory.end()){
 			overallMemory.insert(pair<long, bitset<4096> >
-				(page, bitset<4096>(0)));
+				(page, bitset<4096>));
 			itGlobal = overallMemory.find(page);
 		}
 		itGlobal->second |= itLocal->second;
@@ -165,7 +165,7 @@ static void* hackMemory(void* tSets)
 		itGlobal = overallCode.find(page);
 		if (itGlobal == overallCode.end()){
 			overallCode.insert(pair<long, bitset<4096> >
-				(page, bitset<4096>(0)));
+				(page, bitset<4096>));
 			itGlobal = overallCode.find(page);
 		}
 		itGlobal->second |= itLocal->second;
