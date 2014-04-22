@@ -22,7 +22,7 @@ static map<long, long> touched;
 static map<long, bitset<4096> > overallMemory;
 static map<long, long> memoryTouched;
 static map<long, bitset<4096> > overallCode;
-static map<long, long> codeTouched
+static map<long, long> codeTouched;
 
 //use this class to pass data to threads and parser
 class SetPointers
@@ -112,7 +112,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 				sets->lCode->insert(pair<long, bitset<4096> >
 					(page, bitset<4096>()));
 				sets->lCodeTouched->insert(pair<long, long>
-					(page, 0);
+					(page, 0));
 				itLocal = sets->lCode->find(page);
 			}
 
@@ -150,7 +150,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 					(page, bitset<4096>()));
 				sets->lMemoryTouched->insert(
 					pair<long, long>
-					(page, 0);
+					(page, 0));
 				itLocal = sets->lMemory->find(page);
 			}
 			try {
@@ -172,7 +172,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 						(nextPage, bitset<4096>()));
 					sets->lMemoryTouched->insert(
 						pair<long, long>
-						(nextPage, 0);
+						(nextPage, 0));
 					itLocal = sets->
 						lMemory->find(nextPage);
 				}
@@ -239,11 +239,11 @@ static void* hackMemory(void* tSets)
 		if (itGlobal == overallCount.end()){
 			overallCount.insert(pair<long, bitset<4096> >
 				(page, bitset<4096>()));
-			touched.insert(pair<long, long>(page, 0)
+			touched.insert(pair<long, long>(page, 0));
 			itGlobal = overallCount.find(page);
 		}
 		itLocalTouch = threadSets->lTouched->find(page);
-		itGlobalTouch = touched->find(page);
+		itGlobalTouch = touched.find(page);
 		itGlobalTouch->second += itLocalTouch->second;
 		itGlobal->second |= itLocal->second;
 	}
@@ -259,7 +259,7 @@ static void* hackMemory(void* tSets)
 			itGlobal = overallMemory.find(page);
 		}
 		itLocalTouch = threadSets->lMemoryTouched->find(page);
-		itGlobalTouch = memoryTouched->find(page);
+		itGlobalTouch = memoryTouched.find(page);
 		itGlobalTouch->second += itLocalTouch->second;
 		itGlobal->second |= itLocal->second;
 	}
@@ -271,11 +271,11 @@ static void* hackMemory(void* tSets)
 		if (itGlobal == overallCode.end()){
 			overallCode.insert(pair<long, bitset<4096> >
 				(page, bitset<4096>()));
-			codeTouched.insert(pair<long, long>(page, 0);
+			codeTouched.insert(pair<long, long>(page, 0));
 			itGlobal = overallCode.find(page);
 		}
 		itLocalTouch = threadSets->lCodeTouched->find(page);
-		itGlobalTouch = codeTouched->find(page);
+		itGlobalTouch = codeTouched.find(page);
 		itGlobalTouch->second += itLocalTouch->second;
 		itGlobal->second |= itLocal->second;
 	}
