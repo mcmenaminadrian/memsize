@@ -40,6 +40,7 @@ void usage()
 static void XMLCALL
 hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 {
+	static long x = 0;
 	SetPointers* sets = static_cast<SetPointers*>(data);
 	if (strcmp(name, "instruction") == 0 || strcmp(name, "load") == 0 ||
 		strcmp(name, "modify") == 0||strcmp(name, "store") == 0) {
@@ -93,7 +94,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 				(itLocal->second).set(i + offset);
 			}
 		}
-		} catch (...) {cout << "EXCEPTIONi\n";}
+		} catch (...) {x++; cout << "EXCEPTION " << x << "\n";}
 	}
 }
 
