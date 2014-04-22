@@ -60,7 +60,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 			}
 		}
 		map<long, bitset<4096> >::iterator itLocal;
-
+		try {
 		itLocal = sets->lCount->find(page);
 		if (itLocal == sets->lCount->end()) {
 			sets->lCount->insert(pair<long, bitset<4096> >
@@ -93,6 +93,7 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 				(itLocal->second).set(i + offset);
 			}
 		}
+		} catch (int e) {cout << "EXCEPTION " << e << "\n" ;}
 	}
 }
 
