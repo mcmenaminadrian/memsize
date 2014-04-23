@@ -418,14 +418,14 @@ int main(int argc, char* argv[])
 	}
 	overallFile.close();
 
-	memoryFile.open("~/memmap.txt");
+	memoryFile.open("/usr/userfs/a/acm538/memmap.txt");
 	for (it = overallMemory.begin(); it != overallMemory.end(); it++)
 	{
 		memoryFile << it->first << "," << it->second << "\n";
 	}
 	memoryFile.close();
 
-	codeFile.open("~/codemap.txt");
+	codeFile.open("/usr/userfs/a/acm538/codemap.txt");
 	for (it = overallCode.begin(); it != overallCode.end(); it++)
 	{
 		codeFile << it->first << "," << it->second.count() << "\n";
