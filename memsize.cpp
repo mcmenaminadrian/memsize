@@ -14,25 +14,27 @@
 using namespace std;
 
 #define BUFFSZ 512
+const long __BITSET = 512;
+
 
 static char outputfile[BUFFSZ];
 static pthread_mutex_t countLock = PTHREAD_MUTEX_INITIALIZER;
-static map<long, bitset<4096> > overallCount;
+static map<long, bitset<__BITSET> > overallCount;
 static map<long, long> touched;
-static map<long, bitset<4096> > overallMemory;
+static map<long, bitset<__BITSET> > overallMemory;
 static map<long, long> memoryTouched;
-static map<long, bitset<4096> > overallCode;
+static map<long, bitset<__BITSET> > overallCode;
 static map<long, long> codeTouched;
 
 //use this class to pass data to threads and parser
 class SetPointers
 {
 	public:
-	map<long, bitset<4096> >* lCount;
+	map<long, bitset<__BITSET> >* lCount;
 	map<long, long>* lTouched;
-	map<long, bitset<4096> >* lMemory;
+	map<long, bitset<__BITSET> >* lMemory;
 	map<long, long>* lMemoryTouched;
-	map<long, bitset<4096> >* lCode;
+	map<long, bitset<__BITSET> >* lCode;
 	map<long, long>* lCodeTouched;
 	char* threadPath;
 	int threadID;
@@ -59,20 +61,20 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 		for (i = 0; attr[i]; i += 2) {
 			if (strcmp(attr[i], "address") == 0) {
 				address = strtol(attr[i+1], NULL, 16);
-				page = address >> 12;
-				offset = address & 0xFFF;
+				page = address >> 8;
+				offset = address & 0xFF;
 				continue;
 			}
 			if (strcmp(attr[i], "size") == 0) {
 				size = strtol(attr[i + 1], NULL, 16);
 			}
 		}
-		map<long, bitset<4096> >::iterator itLocal;
+		map<long, bitset<__BITSET> >::iterator itLocal;
 		map<long, long>::iterator itTouched;
 		itLocal = sets->lCount->find(page);
 		if (itLocal == sets->lCount->end()) {
-			sets->lCount->insert(pair<long, bitset<4096> >
-				(page, bitset<4096>()));
+			sets->lCount->insert(pair<long, bitset<__BITSET> >
+				(page, bitset<__BITSET>()));
 			sets->lTouched->insert(pair<long, long>(page, 0));
 			itLocal = sets->lCount->find(page);
 		}
@@ -90,8 +92,8 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 			long nextPage = page + 1;
 			itLocal = sets->lCount->find(nextPage);
 			if (itLocal == sets->lCount->end()) {
-				sets->lCount->insert(pair<long, bitset<4096> >
-					(nextPage, bitset<4096>()));
+				sets->lCount->insert(pair<long, bitset<__BITSET> >
+					(nextPage, bitset<__BITSET>()));
 				sets->lTouched->insert(pair<long, long>
 					(nextPage, 0));
 				itLocal = sets->lCount->find(nextPage);
@@ -109,8 +111,8 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 		if (strcmp(name, "instruction") == 0) {
 			itLocal = sets->lCode->find(page);
 			if (itLocal == sets->lCode->end()) {
-				sets->lCode->insert(pair<long, bitset<4096> >
-					(page, bitset<4096>()));
+				sets->lCode->insert(pair<long, bitset<__BITSET> >
+					(page, bitset<__BITSET>()));
 				sets->lCodeTouched->insert(pair<long, long>
 					(page, 0));
 				itLocal = sets->lCode->find(page);
@@ -128,8 +130,8 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 				itLocal = sets->lCode->find(nextPage);
 				if (itLocal == sets->lCode->end()) {
 					sets->lCode->insert(
-						pair<long, bitset<4096> >
-						(nextPage, bitset<4096>()));
+						pair<long, bitset<__BITSET> >
+						(nextPage, bitset<__BITSET>()));
 					sets->lCodeTouched->insert(
 						pair<long, long>
 						(nextPage, 0));
@@ -146,8 +148,8 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 			itLocal = sets->lMemory->find(page);
 			if (itLocal == sets->lMemory->end()) {
 				sets->lMemory->insert(
-					pair<long, bitset<4096> >
-					(page, bitset<4096>()));
+					pair<long, bitset<__BITSET> >
+					(page, bitset<__BITSET>()));
 				sets->lMemoryTouched->insert(
 					pair<long, long>
 					(page, 0));
@@ -168,8 +170,8 @@ hackHandler(void *data, const XML_Char *name, const XML_Char **attr)
 				itLocal = sets->lMemory->find(nextPage);
 				if (itLocal == sets->lMemory->end()) {
 					sets->lMemory->insert(
-						pair<long, bitset<4096> >
-						(nextPage, bitset<4096>()));
+						pair<long, bitset<__BITSET> >
+						(nextPage, bitset<__BITSET>()));
 					sets->lMemoryTouched->insert(
 						pair<long, long>
 						(nextPage, 0));
@@ -227,9 +229,9 @@ static void* hackMemory(void* tSets)
 
 	pthread_mutex_lock(&countLock);
 	cout << "Thread handled \n";
-	map<long, bitset<4096> >::iterator itLocal;
+	map<long, bitset<__BITSET> >::iterator itLocal;
 	map<long, long>::iterator itLocalTouch;
-	map<long, bitset<4096> >::iterator itGlobal;
+	map<long, bitset<__BITSET> >::iterator itGlobal;
 	map<long, long>::iterator itGlobalTouch;
 
 	for (itLocal = threadSets->lCount->begin();
@@ -237,8 +239,8 @@ static void* hackMemory(void* tSets)
 		long page = itLocal->first;
 		itGlobal = overallCount.find(page);
 		if (itGlobal == overallCount.end()){
-			overallCount.insert(pair<long, bitset<4096> >
-				(page, bitset<4096>()));
+			overallCount.insert(pair<long, bitset<__BITSET> >
+				(page, bitset<__BITSET>()));
 			touched.insert(pair<long, long>(page, 0));
 			itGlobal = overallCount.find(page);
 		}
@@ -253,8 +255,8 @@ static void* hackMemory(void* tSets)
 		long page = itLocal->first;
 		itGlobal = overallMemory.find(page);
 		if (itGlobal == overallMemory.end()){
-			overallMemory.insert(pair<long, bitset<4096> >
-				(page, bitset<4096>()));
+			overallMemory.insert(pair<long, bitset<__BITSET> >
+				(page, bitset<__BITSET>()));
 			memoryTouched.insert(pair<long, long>(page, 0));
 			itGlobal = overallMemory.find(page);
 		}
@@ -269,8 +271,8 @@ static void* hackMemory(void* tSets)
 		long page = itLocal->first;
 		itGlobal = overallCode.find(page);
 		if (itGlobal == overallCode.end()){
-			overallCode.insert(pair<long, bitset<4096> >
-				(page, bitset<4096>()));
+			overallCode.insert(pair<long, bitset<__BITSET> >
+				(page, bitset<__BITSET>()));
 			codeTouched.insert(pair<long, long>(page, 0));
 			itGlobal = overallCode.find(page);
 		}
@@ -298,9 +300,9 @@ countThread(int threadID, char* threadPath)
 	cout << "Handling thread " << threadID << "\n";
 	//parse each file in parallel
 	SetPointers* threadSets = new SetPointers();
-	threadSets->lCount = new map<long, bitset<4096> >();
-	threadSets->lMemory = new map<long, bitset<4096> >();
-	threadSets->lCode = new map<long, bitset<4096> >();
+	threadSets->lCount = new map<long, bitset<__BITSET> >();
+	threadSets->lMemory = new map<long, bitset<__BITSET> >();
+	threadSets->lCode = new map<long, bitset<__BITSET> >();
 	threadSets->lTouched = new map<long, long>();
 	threadSets->lMemoryTouched = new map<long, long>();
 	threadSets->lCodeTouched = new map<long, long>();
@@ -403,7 +405,7 @@ int main(int argc, char* argv[])
 	for_each(threads.begin(), threads.end(), joinup);
 	for_each(threads.begin(), threads.end(), killoff);
 	
-	map<long, bitset<4096> >::iterator it;
+	map<long, bitset<__BITSET> >::iterator it;
 	map<long, long>::iterator itTouched;
 	ofstream overallFile;
 	ofstream memoryFile;
@@ -418,7 +420,7 @@ int main(int argc, char* argv[])
 	}
 	overallFile.close();
 
-	memoryFile.open("/usr/userfs/a/acm538/memmap.txt");
+	memoryFile.open("/usr/userfs/a/acm538/memmap512.txt");
 	for (it = overallMemory.begin(); it != overallMemory.end(); it++)
 	{
 		itTouched = memoryTouched.find(it->first);
@@ -427,7 +429,7 @@ int main(int argc, char* argv[])
 	}
 	memoryFile.close();
 
-	codeFile.open("/usr/userfs/a/acm538/codemap.txt");
+	codeFile.open("/usr/userfs/a/acm538/codemap512.txt");
 	for (it = overallCode.begin(); it != overallCode.end(); it++)
 	{
 		itTouched = codeTouched.find(it->first);
